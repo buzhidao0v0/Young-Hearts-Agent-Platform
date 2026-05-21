@@ -1,0 +1,41 @@
+.reference-card-list {
+  margin: 8px 0 0 0;
+  background: #f6f8fa;
+  border-left: 4px solid #1677ff;
+  border-radius: 6px;
+  padding: 10px 12px;
+  max-width: 85%;
+  box-sizing: border-box;
+}
+.reference-card-title {
+  font-size: 13px;
+  color: #1677ff;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+.reference-card-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.reference-card-item {
+  cursor: pointer;
+  background: #fff;
+  border-radius: 4px;
+  padding: 6px 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  transition: background 0.2s;
+}
+.reference-card-item:hover {
+  background: #e6f0ff;
+}
+.reference-card-item-title {
+  font-size: 14px;
+  color: #222;
+  font-weight: 500;
+}
+.reference-card-item-summary {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}

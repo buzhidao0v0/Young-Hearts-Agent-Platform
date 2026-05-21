@@ -1,0 +1,19 @@
+.logout-btn-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 0 0 0;
+}
+.logout-btn {
+  width: 80%;
+  padding: 12px 0;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+.logout-btn--active {
+  background: #1976d2;
+  color: #fff;
+  cursor: pointer;
+}

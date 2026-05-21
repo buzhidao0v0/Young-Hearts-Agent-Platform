@@ -1,0 +1,146 @@
+
+.list-menu-align-left .list-menu-content {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.list-menu-align-left .list-menu-title {
+  text-align: left;
+  width: 100%;
+}
+.list-menu-align-left .list-menu-value {
+  text-align: left;
+  width: 100%;
+  color: #888;
+  margin-left: 0;
+  margin-top: 2px;
+}
+
+.list-menu-align-split .list-menu-content {
+  flex-direction: row;
+  justify-content: space-between;
+}
+.list-menu-align-split .list-menu-title {
+  text-align: left;
+}
+.list-menu-align-split .list-menu-value {
+  text-align: right;
+  color: #888;
+}
+
+.list-menu-align-custom .list-menu-content {
+  /* 预留自定义扩展 */
+}
+
+.list-menu {
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+.list-menu-group {
+  width: 100%;
+}
+.list-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: none;
+  background: none;
+  position: relative;
+}
+.list-menu-item:hover {
+  background: #f7f7fa;
+}
+.list-menu-item:active {
+  background: #f0f0f0;
+}
+.list-menu-icon {
+  margin-right: 14px;
+  font-size: 22px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  min-width: 22px;
+  justify-content: center;
+}
+.list-menu-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.list-menu-title {
+  font-size: 16px;
+  color: #222;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-menu-desc {
+  font-size: 13px;
+  color: #888;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-menu-arrow {
+  margin-left: 10px;
+  font-size: 18px;
+  color: #bbb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+}
+.list-menu-divider {
+  height: 0.5px;
+  background: #f0f0f0;
+  margin: 18px 20px;
+  border: none;
+}
+
+@media (max-width: 600px) {
+  .list-menu-item {
+    padding: 13px 10px;
+  }
+  .list-menu-title {
+    font-size: 15px;
+  }
+  .list-menu-icon {
+    font-size: 20px;
+    min-width: 20px;
+  }
+  .list-menu-arrow {
+    font-size: 16px;
+    min-width: 16px;
+  }
+  .list-menu-divider {
+    margin: 12px 10px;
+    height: 0.5px;
+  }
+}
+
+@media (max-width: 600px) {
+  .list-menu-item {
+    padding: 13px 10px;
+  }
+  .list-menu-title {
+    font-size: 15px;
+  }
+  .list-menu-icon {
+    font-size: 20px;
+    min-width: 20px;
+  }
+  .list-menu-arrow {
+    font-size: 16px;
+    min-width: 16px;
+  }
+  .list-menu-divider {
+    height: 0.5px;
+  }
+}

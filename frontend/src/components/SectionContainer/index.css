@@ -1,0 +1,33 @@
+/* SectionContainer 组件样式（局部作用域） */
+.section-container {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #ececec;
+  margin: 16px auto;
+  padding: 24px 20px 20px 20px;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.03);
+  transition: box-shadow 0.2s;
+  width: 80%;
+}
+.section-container:not(:last-child) {
+  margin-bottom: 24px;
+}
+.section-header {
+  margin-bottom: 12px;
+  border-bottom: 1px solid #f2f2f2;
+  padding-bottom: 8px;
+}
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #222;
+}
+.section-description {
+  font-size: 0.98rem;
+  color: #888;
+  margin-bottom: 0;
+}
+.section-content {
+  /* 支持嵌套分区，内容区域可自定义 */
+}

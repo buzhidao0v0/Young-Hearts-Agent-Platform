@@ -1,0 +1,21 @@
+.field-editor {
+  width: 100%;
+}
+
+.field-editor :where(.adm-input) {
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  transition: border-color 0.2s;
+}
+
+.field-editor :where(.adm-input:focus-within) {
+  border-color: #1677ff;
+}
+
+.field-editor-error {
+  color: var(--adm-color-danger, #ff4d4f);
+  font-size: 12px;
+  margin-top: 8px;
+  line-height: 1.5;
+  padding-left: 4px;
+}

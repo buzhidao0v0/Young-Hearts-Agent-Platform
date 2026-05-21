@@ -1,0 +1,42 @@
+.quick-actions-bar {
+  width: 100%;
+  overflow-x: auto;
+  background: transparent;
+  padding: 8px 0 0 0;
+  margin: 0;
+}
+
+.quick-actions-scroll {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0;
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #1677ff;
+  border-radius: 16px;
+  padding: 6px 14px;
+  font-size: 14px;
+  color: #1677ff;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(22,119,255,0.05);
+}
+.quick-action-btn:hover {
+  background: #1677ff;
+  color: #fff;
+}
+.quick-action-icon {
+  margin-right: 6px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+}
+.quick-action-label {
+  white-space: nowrap;
+}

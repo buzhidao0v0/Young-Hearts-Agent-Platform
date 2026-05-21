@@ -1,0 +1,147 @@
+/* 消息流组件样式 */
+.message-list {
+  padding: 16px 12px 16px 12px;
+  overflow-y: auto;
+  height: 100%;
+  background: #f7f8fa;
+  display: flex;
+  flex-direction: column;
+}
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  width: 100%;
+}
+.message-wrapper.user {
+  align-items: flex-end;
+}
+.message-wrapper.ai {
+  align-items: flex-start;
+}
+.message-bubble {
+  max-width: 85%;
+  display: flex;
+  flex-direction: column;
+}
+.message-bubble.user {
+  align-self: flex-end;
+  background: #1677ff;
+  color: #fff;
+  border-radius: 18px 18px 4px 18px;
+  box-shadow: 0 2px 8px rgba(22,119,255,0.15);
+}
+.message-bubble.ai {
+  align-self: flex-start;
+  background: #fff;
+  color: #222;
+  border: 1px solid #e6f0ff;
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.bubble-content {
+  padding: 12px 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+/* User message: preserve whitespace for plain text */
+.message-bubble.user .bubble-content {
+  white-space: pre-wrap;
+}
+
+/* AI message: valid markdown needs normal whitespace (blocks handle layout) */
+.message-bubble.ai .bubble-content {
+  white-space: normal;
+}
+
+/* Markdown Styles for AI messages */
+.message-bubble.ai .bubble-content p {
+  margin: 0.5em 0;
+}
+.message-bubble.ai .bubble-content p:first-child {
+  margin-top: 0;
+}
+.message-bubble.ai .bubble-content p:last-child {
+  margin-bottom: 0;
+}
+
+.message-bubble.ai .bubble-content ul,
+.message-bubble.ai .bubble-content ol {
+  margin: 0.5em 0;
+  padding-left: 20px;
+}
+
+.message-bubble.ai .bubble-content li {
+  margin-bottom: 0.25em;
+}
+
+.message-bubble.ai .bubble-content code {
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  background-color: rgba(0, 0, 0, 0.06);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+.message-bubble.ai .bubble-content pre {
+  background-color: #f6f8fa;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0.8em 0;
+}
+
+.message-bubble.ai .bubble-content pre code {
+  background-color: transparent;
+  padding: 0;
+  font-size: 0.85em;
+  color: #24292e;
+  white-space: pre;
+}
+
+.message-bubble.ai .bubble-content blockquote {
+  margin: 0.5em 0;
+  padding-left: 10px;
+  border-left: 3px solid #dfe2e5;
+  color: #6a737d;
+}
+
+.message-bubble.ai .bubble-content a {
+  color: #0969da;
+  text-decoration: none;
+}
+.message-bubble.ai .bubble-content a:hover {
+  text-decoration: underline;
+}
+
+.message-bubble.ai .bubble-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.8em 0;
+  font-size: 0.9em;
+}
+.message-bubble.ai .bubble-content th,
+.message-bubble.ai .bubble-content td {
+  border: 1px solid #d0d7de;
+  padding: 6px 13px;
+}
+.message-bubble.ai .bubble-content th {
+  background-color: #f6f8fa;
+  font-weight: 600;
+}
+.bubble-meta {
+  font-size: 12px;
+  color: #999;
+  margin: 4px 0 0 8px;
+}
+
+.message-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #999;
+  font-size: 14px;
+}

@@ -1,0 +1,52 @@
+@import '../../styles/variables.css';
+
+.yh-header {
+  height: var(--header-height);
+  background: var(--header-bg);
+  color: var(--header-color);
+  font-family: var(--font-family);
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  z-index: 100;
+}
+
+.adm-nav-bar-left {
+  padding-right: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+.adm-nav-bar-title {
+  justify-content: flex-start !important;
+  padding-left: 4px;
+}
+/* 右侧操作区靠右对齐 */
+.adm-nav-bar-right {
+  align-items: flex-end;
+}
+
+
+/* 预留头部高度 */
+.yh-home-main-scrollable {
+  margin-top: var(--header-height);
+}
+.yh-header-title {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: left;
+  justify-content: flex-start;
+  display: flex;
+  align-items: flex-end;
+}
+.yh-header-subtitle {
+  font-size: 12px;
+  margin-left: 8px;
+  color: #e0e0e0;
+  line-height: 18px;
+  padding-bottom: 1px;
+}

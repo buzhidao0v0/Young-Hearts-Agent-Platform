@@ -1,0 +1,20 @@
+@import '../../styles/variables.css';
+
+.yh-bottomnav {
+  background: var(--yh-bottomnav-bg);
+  border-radius: 0 0 var(--yh-radius) var(--yh-radius);
+  font-family: var(--yh-font-family);
+  box-shadow: 0 -1px 8px rgba(0,0,0,0.03);
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  z-index: 100;
+}
+
+/* 预留底部高度 */
+.yh-home-main-scrollable {
+  margin-bottom: var(--yh-bottomnav-height, 56px);
+  flex: 1;
+  overflow-y: auto;
+}
