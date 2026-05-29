@@ -63,3 +63,14 @@ coverage/
 *.pid
 *.seed
 *.pid.lock
+tmp/
+
+# IDE / 工具
+.vs/
+.arts/
+
+# Lock files (use pnpm-lock.yaml instead)
+package-lock.json
+
+# OpenAPI generated
+openapi.json

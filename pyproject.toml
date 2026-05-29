@@ -1,25 +1,37 @@
-﻿# 心青年智能体平台 (Young Hearts Agent Platform)
-基于FastAPI + React技术栈，支持RAG知识库检索与豆包大模型对接。
+[project]
+name = "young-hearts-agent-platform"
+version = "0.1.0"
+description = "心青年智能体平台 - Hybrid Monorepo"
+readme = "README.md"
+requires-python = ">=3.12"
 
-## 技术栈
-| 层级 | 技术选型 |
-|------|----------|
-| 前端 | React 18 + Vite + TypeScript |
-| 后端 | FastAPI 0.128 + Python 3.10+ |
-| 数据库 | PostgreSQL 16 + SQLAlchemy 2.0 |
-| 向量库 | ChromaDB / Qdrant |
-| AI编排 | LangChain + 豆包大模型 |
-| 任务队列 | Celery + Redis |
-| 部署 | Docker + Docker Compose |
+[tool.uv.workspace]
+members = [
+    "apps/api-server",
+    "apps/ai-worker",
+    "packages/py-config",
+    "packages/py-db",
+    "packages/py-schemas",
+    "packages/py-auth",
+    "packages/py-ai-engine",
+    "packages/py-logger",
+    "packages/py-messaging",
+]
 
-## 快速启动
-### 方式一：一键启动开发环境
-```bash
-# 1. 安装所有依赖
-npm run install:all
+[tool.uv]
+dev-dependencies = [
+    "pytest>=9.0.2",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.11",
+]
 
-# 2. 复制配置模板并填写相关密钥
-copy .env.example .env
+[tool.ruff]
+target-version = "py312"
+line-length = 120
 
-# 3. 同时启动前后端服务
-npm run dev
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "apps/*/tests", "packages/*/tests"]
+asyncio_mode = "auto"

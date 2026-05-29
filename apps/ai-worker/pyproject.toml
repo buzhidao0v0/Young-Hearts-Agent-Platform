@@ -1,0 +1,17 @@
+[project]
+name = "young-hearts-ai-worker"
+version = "0.1.0"
+description = "Celery Worker - 异步任务处理器"
+requires-python = ">=3.12"
+dependencies = [
+    "celery>=5.4",
+    "py-config",
+    "py-db",
+    "py-ai-engine",
+    "py-messaging",
+    "py-logger",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
