@@ -1,5 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
+import subprocess
 import sys
-sys.path.insert(0, '.')
-from start import main
-main(["api"])
+sys.exit(subprocess.call([sys.executable, "scripts/start.py", "--services", "api"]))

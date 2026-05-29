@@ -7,6 +7,7 @@ from starlette.responses import Response
 
 from py_logger.context import set_trace_id, get_trace_id
 from py_logger.core import get_logger
+from py_logger.events import REQUEST_RECEIVED, REQUEST_COMPLETED
 
 logger = get_logger("middleware.request")
 
@@ -16,10 +17,16 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         trace = request.headers.get("X-Trace-ID", uuid.uuid4().hex[:16])
         set_trace_id(trace)
         start = time.perf_counter()
+        logger.info(
+            REQUEST_RECEIVED,
+            method=request.method,
+            path=request.url.path,
+            trace_id=trace,
+        )
         response = await call_next(request)
         elapsed_ms = (time.perf_counter() - start) * 1000
         logger.info(
-            "request_completed",
+            REQUEST_COMPLETED,
             method=request.method,
             path=request.url.path,
             status=response.status_code,

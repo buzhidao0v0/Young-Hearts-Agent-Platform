@@ -1,6 +1,3 @@
-from sqlalchemy.orm import declarative_base
+from py_db.models import Base, User, VolunteerProfile, ExpertProfile, Session
 
-Base = declarative_base()
-
-# 导入所有模型以便 metadata 注册
-from app.models import user  # noqa: F401
+__all__ = ["Base", "User", "VolunteerProfile", "ExpertProfile", "Session"]

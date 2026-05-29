@@ -74,3 +74,12 @@ package-lock.json
 
 # OpenAPI generated
 openapi.json
+
+# uv / Python tooling
+uv.lock
+.venv/
+.uv/
+.aux/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/

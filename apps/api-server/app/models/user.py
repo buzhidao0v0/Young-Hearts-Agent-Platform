@@ -1,6 +1,6 @@
 from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, JSON, ForeignKeyConstraint
 from sqlalchemy.sql import func
-from app.models import Base
+from py_db.models import Base
 
 
 
