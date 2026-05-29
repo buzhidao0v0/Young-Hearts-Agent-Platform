@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.user import User
 from app.repositories.session_repository import get_by_session_id
+from app.repositories.user_repository import get_user_by_id
 from app.core.config import settings
 
 
@@ -32,7 +33,7 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
             expired_at = expired_at.replace(tzinfo=timezone.utc)
         if expired_at < now:
             raise HTTPException(status_code=401, detail="Session 已过期")
-    user = db.query(User).filter(User.id == session.user_id).first()
+    user = get_user_by_id(db, session.user_id)
     if not user:
         raise HTTPException(status_code=401, detail="Session 关联用户不存在")
     if hasattr(user, "status") and getattr(user, "status", None) == "banned":

@@ -45,8 +45,8 @@ async def delete_me(db: Session = Depends(get_db), current_user=Depends(get_curr
 
 
 @router.post("/login", response_model=UserOut, summary="用户登录", description="登录成功后写 session 表，Web 端 set_cookie，App 端返回 session_id")
-async def login(user_in: UserLogin, response: Response, request: Request):
-    user, session_id = await auth_service.login(user_in, request)
+async def login(user_in: UserLogin, response: Response, request: Request, db: Session = Depends(get_db)):
+    user, session_id = await auth_service.login(db, user_in, request)
     user_agent = request.headers.get("user-agent", "")
     if "web" in user_agent.lower():
         response.set_cookie(key="session_id", value=session_id, httponly=True)
@@ -56,8 +56,8 @@ async def login(user_in: UserLogin, response: Response, request: Request):
 
 
 @router.post("/logout", summary="用户登出", description="清理 session 表记录，清除 Cookie/Header")
-async def logout(request: Request, response: Response):
-    await auth_service.logout(request)
+async def logout(request: Request, response: Response, db: Session = Depends(get_db)):
+    await auth_service.logout(db, request)
     user_agent = request.headers.get("user-agent", "")
     if "web" in user_agent.lower():
         response.delete_cookie(key="session_id")

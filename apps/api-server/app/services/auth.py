@@ -9,8 +9,9 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.services.user_service import get_user_by_username, get_user_by_id
-from app.db.session import get_db
+from app.services.user_service import get_user_by_id
+from app.repositories.user_repository import get_user_by_username as repo_get_user_by_username
+from app.repositories.session_repository import create_session, delete_by_session_id
 from app.models.user import Session as SessionModel, User
 import secrets
 
@@ -62,10 +63,9 @@ def require_roles(roles):
         return wrapper
     return decorator
 
-# 登录：生成 session_id 并写入 session 表
-async def login(user_in, request: Request):
-    db: Session = next(get_db())
-    user = get_user_by_username(db, user_in.username)
+async def login(db: Session, user_in, request: Request):
+    """登录：验证凭据，生成 session_id 并通过 repository 写入 session 表。"""
+    user = repo_get_user_by_username(db, user_in.username)
     if not user or not verify_password(user_in.password, getattr(user, "password_hash", "")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     user_agent = request.headers.get("user-agent", "")
@@ -81,25 +81,21 @@ async def login(user_in, request: Request):
         user_agent=user_agent,
         ip=ip
     )
-    db.add(session)
-    db.commit()
-    # 关键：刷新 user，转换为 Pydantic 模型，防止 DetachedInstanceError
+    create_session(db, session)
     db.refresh(user)
     from app.schemas.user import UserOut
     user_out = UserOut.model_validate(user)
     return user_out, session_id
 
-# 登出：清理 session 表记录，支持 Cookie/Header
-async def logout(request: Request):
-    db: Session = next(get_db())
+async def logout(db: Session, request: Request):
+    """登出：通过 repository 清理 session 表记录，支持 Cookie/Header。"""
     session_id = None
     if "session_id" in request.cookies:
         session_id = request.cookies["session_id"]
     elif "x-session-id" in request.headers:
         session_id = request.headers["x-session-id"]
     if session_id:
-        db.query(SessionModel).filter(SessionModel.session_id == session_id).delete()
-        db.commit()
+        delete_by_session_id(db, session_id)
 
 # 注册：字段与校验对齐 API 设计
 async def register(db, user_in):
