@@ -10,9 +10,13 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.services.user_service import get_user_by_id
-from app.repositories.user_repository import get_user_by_username as repo_get_user_by_username
-from app.repositories.session_repository import create_session, delete_by_session_id
-from app.models.user import Session as SessionModel, User
+from app.repositories.user_repository import (
+    get_user_by_username as repo_get_user_by_username,
+    create_user_with_profiles,
+    get_user_by_id as repo_get_user_by_id,
+)
+from app.repositories.session_repository import create_session, delete_by_session_id, get_valid_session
+from app.models.user import Session as SessionModel, User, VolunteerProfile, ExpertProfile
 import secrets
 
 # 初始化密码加密上下文，指定用 argon2 算法，自动处理过时的加密方式
@@ -97,11 +101,8 @@ async def logout(db: Session, request: Request):
     if session_id:
         delete_by_session_id(db, session_id)
 
-# 注册：字段与校验对齐 API 设计
 async def register(db, user_in):
-    """注册：字段与校验对齐 API 设计，使用 repository 层。"""
-    from app.models.user import User, VolunteerProfile, ExpertProfile
-    import json as _json
+    """注册：字段与校验对齐 API 设计，通过 repository 层原子性创建。"""
     user = User(
         username=user_in.username,
         email=getattr(user_in, "email", None),
@@ -113,12 +114,10 @@ async def register(db, user_in):
         status=user_in.status or "active",
         is_active=True,
     )
-    db.add(user)
-    db.flush()
+    vp = None
     if "volunteer" in user_in.roles and user_in.volunteer_info is not None:
         v = user_in.volunteer_info
         vp = VolunteerProfile(
-            user_id=user.id,
             full_name=getattr(v, "full_name", None),
             phone=getattr(v, "phone", None),
             public_email=getattr(v, "public_email", None),
@@ -127,11 +126,10 @@ async def register(db, user_in):
             status="pending",
             work_status="offline",
         )
-        db.add(vp)
+    ep = None
     if "expert" in user_in.roles and user_in.expert_info is not None:
         e = user_in.expert_info
         ep = ExpertProfile(
-            user_id=user.id,
             full_name=getattr(e, "full_name", None),
             phone=getattr(e, "phone", None),
             public_email=getattr(e, "public_email", None),
@@ -140,15 +138,11 @@ async def register(db, user_in):
             skills=str(getattr(e, "skills", []) or []),
             status="pending",
         )
-        db.add(ep)
-    db.commit()
-    db.refresh(user)
-    return user
+    return create_user_with_profiles(db, user, vp, ep)
 
-# 自动识别 Cookie/Header，查 session 表，注入 user
 def get_current_user_from_context(request: Request, db: Session = Depends(get_db)):
+    """自动识别 Cookie/Header，查 session 表，注入 user。"""
     session_id = None
-    # 优先 Cookie
     if settings.SESSION_COOKIE_NAME in request.cookies:
         session_id = request.cookies[settings.SESSION_COOKIE_NAME]
         session_id_source = "cookie"
@@ -159,22 +153,10 @@ def get_current_user_from_context(request: Request, db: Session = Depends(get_db
         session_id_source = None
     if not session_id:
         raise HTTPException(status_code=401, detail="SessionID required（未在 Cookie 或 Header 中找到 session_id）")
-    session = db.query(SessionModel).filter(SessionModel.session_id == session_id).first()
-    if not session:
-        raise HTTPException(status_code=401, detail=f"Session 失效或不存在（session_id={session_id}，来源={session_id_source}）")
-    expired_at = getattr(session, "expired_at", None)
-    if expired_at is not None and isinstance(expired_at, datetime):
-        now = datetime.now(timezone.utc)
-        if expired_at.tzinfo is None:
-            expired_at_utc = expired_at.replace(tzinfo=timezone.utc)
-        else:
-            expired_at_utc = expired_at.astimezone(timezone.utc)
-        if expired_at_utc < now:
-            raise HTTPException(status_code=401, detail=f"Session 已过期（session_id={session_id}，expired_at={expired_at_utc.isoformat()}，now={now.isoformat()}）")
-    user = db.query(User).filter(User.id == session.user_id).first()
+    session = get_valid_session(db, session_id)
+    user = repo_get_user_by_id(db, session.user_id)
     if not user:
         raise HTTPException(status_code=401, detail=f"Session 关联用户不存在（user_id={session.user_id}，session_id={session_id}）")
-    # 可选：校验用户状态
     if hasattr(user, "status") and getattr(user, "status", None) == "banned":
         raise HTTPException(status_code=403, detail=f"用户已被禁用（user_id={user.id}，username={user.username}）")
     return user
