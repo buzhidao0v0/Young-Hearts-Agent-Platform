@@ -1,4 +1,3 @@
-"""py_config — 全局配置共享包。"""
 from py_config.settings import Settings, settings
 
 __all__ = ["Settings", "settings"]

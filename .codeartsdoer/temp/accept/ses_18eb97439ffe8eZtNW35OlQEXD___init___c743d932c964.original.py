@@ -1,4 +1,3 @@
-"""services — 业务逻辑层。"""
 # services package for business logic
 
 __all__ = []
