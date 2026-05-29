@@ -1,9 +1,10 @@
 """用户、Profile 及会话 Pydantic 模型定义。"""
 
-from typing import Optional, List, Literal, Union
-from pydantic import BaseModel, model_validator, field_validator
-from datetime import datetime
 import json
+from datetime import datetime
+from typing import Literal
+
+from pydantic import BaseModel, field_validator, model_validator
 
 # 用户角色类型
 UserRole = Literal["family", "volunteer", "expert", "admin", "maintainer"]
@@ -20,15 +21,15 @@ class UserLogin(BaseModel):
 class UserBase(BaseModel):
     """用户基础信息模型。"""
 
-    username: Optional[str]
-    email: Optional[str]
-    gender: Optional[str] = "hidden"  # ['male', 'female', 'hidden']
-    nickname: Optional[str] = None
-    avatar: Optional[str] = None
-    roles: List[UserRole] = []  # 只接受/输出 List[str]，由 ORM 层保证为 JSON 字符串
-    status: Optional[str] = "active"
-    is_active: Optional[bool] = True
-    is_superuser: Optional[bool] = False
+    username: str | None
+    email: str | None
+    gender: str | None = "hidden"  # ['male', 'female', 'hidden']
+    nickname: str | None = None
+    avatar: str | None = None
+    roles: list[UserRole] = []  # 只接受/输出 List[str]，由 ORM 层保证为 JSON 字符串
+    status: str | None = "active"
+    is_active: bool | None = True
+    is_superuser: bool | None = False
 
 
 # --- Profile Schemas ---
@@ -37,9 +38,9 @@ class VolunteerProfileCreate(BaseModel):
 
     full_name: str
     phone: str
-    public_email: Optional[str] = None
-    is_public_visible: Optional[bool] = False
-    skills: Optional[List[str]] = []
+    public_email: str | None = None
+    is_public_visible: bool | None = False
+    skills: list[str] | None = []
 
 
 class ExpertProfileCreate(BaseModel):
@@ -47,10 +48,10 @@ class ExpertProfileCreate(BaseModel):
 
     full_name: str
     phone: str
-    public_email: Optional[str] = None
-    title: Optional[str] = None
-    org: Optional[str] = None
-    skills: Optional[List[str]] = []
+    public_email: str | None = None
+    title: str | None = None
+    org: str | None = None
+    skills: list[str] | None = []
 
 
 # 注册请求 schema
@@ -59,13 +60,13 @@ class UserRegisterRequest(BaseModel):
 
     username: str
     password: str
-    email: Optional[str] = None
-    gender: Optional[str] = "hidden"
-    nickname: Optional[str] = None
-    avatar: Optional[str] = None
-    roles: List[UserRole]
-    volunteer_info: Optional[VolunteerProfileCreate] = None
-    expert_info: Optional[ExpertProfileCreate] = None
+    email: str | None = None
+    gender: str | None = "hidden"
+    nickname: str | None = None
+    avatar: str | None = None
+    roles: list[UserRole]
+    volunteer_info: VolunteerProfileCreate | None = None
+    expert_info: ExpertProfileCreate | None = None
 
     @model_validator(mode="after")
     def check_profile_required(self):
@@ -93,9 +94,9 @@ class VolunteerProfileOut(VolunteerProfileCreate):
     """志愿者档案输出模型。"""
 
     user_id: int
-    service_hours: Optional[str] = "0"
-    status: Optional[str] = "pending"
-    work_status: Optional[str] = "offline"
+    service_hours: str | None = "0"
+    status: str | None = "pending"
+    work_status: str | None = "offline"
 
     class Config:
         """Pydantic 配置：启用 ORM 模式。"""
@@ -106,7 +107,7 @@ class ExpertProfileOut(ExpertProfileCreate):
     """专家档案输出模型。"""
 
     user_id: int
-    status: Optional[str] = "pending"
+    status: str | None = "pending"
 
     class Config:
         """Pydantic 配置：启用 ORM 模式。"""
@@ -117,8 +118,8 @@ class UserOut(UserBase):
     """用户输出模型。"""
 
     id: int
-    volunteer_profile: Optional[VolunteerProfileOut] = None
-    expert_profile: Optional[ExpertProfileOut] = None
+    volunteer_profile: VolunteerProfileOut | None = None
+    expert_profile: ExpertProfileOut | None = None
 
     class Config:
         """Pydantic 配置：启用 ORM 模式。"""
@@ -140,18 +141,18 @@ class SessionBase(BaseModel):
     session_id: str
     user_id: int
     created_at: datetime
-    expired_at: Optional[datetime] = None
-    user_agent: Optional[str] = None
-    ip: Optional[str] = None
+    expired_at: datetime | None = None
+    user_agent: str | None = None
+    ip: str | None = None
 
 
 class SessionCreate(BaseModel):
     """会话创建请求模型。"""
 
     user_id: int
-    expired_at: Optional[datetime] = None
-    user_agent: Optional[str] = None
-    ip: Optional[str] = None
+    expired_at: datetime | None = None
+    user_agent: str | None = None
+    ip: str | None = None
 
 
 class SessionOut(SessionBase):
@@ -165,13 +166,13 @@ class SessionOut(SessionBase):
 class UserUpdate(BaseModel):
     """用户更新请求模型。"""
 
-    username: Optional[str] = None
-    email: Optional[str] = None
-    gender: Optional[str] = None
-    password: Optional[str] = None
-    full_name: Optional[str] = None
-    is_active: Optional[bool] = None
-    is_superuser: Optional[bool] = None
+    username: str | None = None
+    email: str | None = None
+    gender: str | None = None
+    password: str | None = None
+    full_name: str | None = None
+    is_active: bool | None = None
+    is_superuser: bool | None = None
 
 
 class Token(BaseModel):
@@ -184,5 +185,5 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     """令牌解码数据模型。"""
 
-    username: Optional[str] = None
-    user_id: Optional[int] = None
+    username: str | None = None
+    user_id: int | None = None

@@ -1,25 +1,28 @@
 """认证业务：登录、登出、注册与密码校验。"""
 
-from datetime import datetime, timedelta, timezone
+import secrets
+from datetime import UTC, datetime, timedelta
+from functools import wraps
 from typing import cast
 
-from passlib.context import CryptContext
-
-from fastapi import Depends, HTTPException, status, Request
-from functools import wraps
-from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
-
 from app.core.config import settings
-from app.services.user_service import get_user_by_id
+from app.db.session import get_db
+from app.models.user import ExpertProfile, User, VolunteerProfile
+from app.models.user import Session as SessionModel
+from app.repositories.session_repository import create_session, delete_by_session_id, get_valid_session
 from app.repositories.user_repository import (
-    get_user_by_username as repo_get_user_by_username,
     create_user_with_profiles,
+)
+from app.repositories.user_repository import (
     get_user_by_id as repo_get_user_by_id,
 )
-from app.repositories.session_repository import create_session, delete_by_session_id, get_valid_session
-from app.models.user import Session as SessionModel, User, VolunteerProfile, ExpertProfile
-import secrets
+from app.repositories.user_repository import (
+    get_user_by_username as repo_get_user_by_username,
+)
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import OAuth2PasswordBearer
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 
 # 初始化密码加密上下文，指定用 argon2 算法，自动处理过时的加密方式
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
@@ -39,7 +42,7 @@ def get_password_hash(password: str) -> str:
 
 def authenticate_user(db: Session, username: str, password: str):
     """验证用户凭据，返回用户或 None。"""
-    user = get_user_by_username(db, username)
+    user = repo_get_user_by_username(db, username)
     if not user:
         return None
     if not verify_password(password, cast(str, user.password_hash)):
@@ -56,19 +59,31 @@ def require_roles(roles):
         async def wrapper(*args, **kwargs):
             current_user = kwargs.get('current_user')
             if not current_user or not hasattr(current_user, 'roles'):
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="权限校验失败：未获取到用户信息或缺少 roles 属性")
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="权限校验失败：未获取到用户信息或缺少 roles 属性",
+                )
             user_roles = getattr(current_user, 'roles', [])
             if isinstance(user_roles, str):
                 user_roles = json.loads(user_roles)
             if not isinstance(user_roles, list):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"权限校验失败：user.roles 类型应为 list[str]，实际为 {type(user_roles).__name__}，值为 {user_roles}"
+                    detail=(
+                        f"权限校验失败：user.roles 类型应为 list[str]，"
+                        f"实际为 {type(user_roles).__name__}，值为 {user_roles}"
+                    ),
                 )
             required_roles = set(roles)
             user_roles_set = set(user_roles)
             if not user_roles_set & required_roles:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"权限不足：用户角色 {list(user_roles_set)} 不包含所需角色 {list(required_roles)}")
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=(
+                        f"权限不足：用户角色 {list(user_roles_set)} "
+                        f"不包含所需角色 {list(required_roles)}"
+                    ),
+                )
             return await func(*args, **kwargs)
         return wrapper
     return decorator
@@ -81,7 +96,7 @@ async def login(db: Session, user_in, request: Request):
     user_agent = request.headers.get("user-agent", "")
     ip = request.client.host if request.client else ""
     session_id = secrets.token_urlsafe(32)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expired_at = now + timedelta(minutes=getattr(settings, "SESSION_EXPIRE_MINUTES", 10080))
     session = SessionModel(
         session_id=session_id,
@@ -151,18 +166,20 @@ def get_current_user_from_context(request: Request, db: Session = Depends(get_db
     session_id = None
     if settings.SESSION_COOKIE_NAME in request.cookies:
         session_id = request.cookies[settings.SESSION_COOKIE_NAME]
-        session_id_source = "cookie"
     elif request.headers.get("X-Session-ID"):
         session_id = request.headers.get("X-Session-ID")
-        session_id_source = "header"
-    else:
-        session_id_source = None
     if not session_id:
         raise HTTPException(status_code=401, detail="SessionID required（未在 Cookie 或 Header 中找到 session_id）")
     session = get_valid_session(db, session_id)
     user = repo_get_user_by_id(db, session.user_id)
     if not user:
-        raise HTTPException(status_code=401, detail=f"Session 关联用户不存在（user_id={session.user_id}，session_id={session_id}）")
+        raise HTTPException(
+            status_code=401,
+            detail=(
+                f"Session 关联用户不存在"
+                f"（user_id={session.user_id}，session_id={session_id}）"
+            ),
+        )
     if hasattr(user, "status") and getattr(user, "status", None) == "banned":
         raise HTTPException(status_code=403, detail=f"用户已被禁用（user_id={user.id}，username={user.username}）")
     return user

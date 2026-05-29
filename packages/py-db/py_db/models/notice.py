@@ -1,7 +1,8 @@
 """通知与通知接收人 ORM 模型定义。"""
 
-from sqlalchemy import Column, BigInteger, String, Text, DateTime, JSON, ForeignKeyConstraint
+from sqlalchemy import BigInteger, Column, DateTime, ForeignKeyConstraint, String, Text
 from sqlalchemy.sql import func
+
 from py_db.session import Base
 
 

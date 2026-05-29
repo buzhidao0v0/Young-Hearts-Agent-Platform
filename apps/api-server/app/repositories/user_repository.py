@@ -1,10 +1,8 @@
 """用户数据访问层：CRUD 与 Profile 关联创建。"""
 
-from typing import Optional
 
+from app.models.user import ExpertProfile, User, VolunteerProfile
 from sqlalchemy.orm import Session
-
-from app.models.user import User, Session as SessionModel, VolunteerProfile, ExpertProfile
 
 
 def get_user_by_username(db: Session, username: str) -> User | None:
@@ -27,8 +25,8 @@ def create_user(db: Session, user: User) -> User:
 def create_user_with_profiles(
     db: Session,
     user: User,
-    volunteer_profile: Optional[VolunteerProfile] = None,
-    expert_profile: Optional[ExpertProfile] = None,
+    volunteer_profile: VolunteerProfile | None = None,
+    expert_profile: ExpertProfile | None = None,
 ) -> User:
     """原子性创建用户及其关联 Profile。
 

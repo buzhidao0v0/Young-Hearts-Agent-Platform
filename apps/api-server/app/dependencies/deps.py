@@ -1,16 +1,15 @@
 """FastAPI 依赖注入：当前用户与角色校验。"""
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from fastapi import Depends, HTTPException, Request, status
-from sqlalchemy.orm import Session
-
+from app.core.config import settings
 from app.db.session import get_db
 from app.models.user import User
 from app.repositories.session_repository import get_by_session_id
 from app.repositories.user_repository import get_user_by_id
-from app.core.config import settings
+from fastapi import Depends, HTTPException, Request, status
+from sqlalchemy.orm import Session
 
 
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
@@ -30,9 +29,9 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
         raise HTTPException(status_code=401, detail=f"Session 失效（来源={source}）")
     expired_at = getattr(session, "expired_at", None)
     if expired_at is not None and isinstance(expired_at, datetime):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if expired_at.tzinfo is None:
-            expired_at = expired_at.replace(tzinfo=timezone.utc)
+            expired_at = expired_at.replace(tzinfo=UTC)
         if expired_at < now:
             raise HTTPException(status_code=401, detail="Session 已过期")
     user = get_user_by_id(db, session.user_id)

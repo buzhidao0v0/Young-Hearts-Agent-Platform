@@ -1,6 +1,5 @@
 """租户相关 Schema 定义模块。"""
 
-from typing import Optional
 
 from py_schemas.base import BaseSchema
 

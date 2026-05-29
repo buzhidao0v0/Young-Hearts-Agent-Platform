@@ -1,8 +1,8 @@
 """用户注册/登录/登出/角色权限接口测试。"""
 import uuid
-import time
-from fastapi.testclient import TestClient
+
 from app.main import app
+from fastapi.testclient import TestClient
 
 client = TestClient(app)
 
@@ -127,7 +127,6 @@ def test_register_duplicate():
     assert r.status_code in (400, 409)
 
 # --- 分角色注册功能 Phase 4: 多角色注册与 profile 测试 ---
-import pytest
 
 def test_register_multi_roles_and_profiles():
     """注册多角色用户，校验 profile 创建与状态"""

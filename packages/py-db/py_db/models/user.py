@@ -1,7 +1,8 @@
 """用户、志愿者、专家及会话 ORM 模型定义。"""
 
-from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, JSON, ForeignKeyConstraint
+from sqlalchemy import JSON, BigInteger, Boolean, Column, DateTime, ForeignKeyConstraint, String
 from sqlalchemy.sql import func
+
 from py_db.session import Base
 
 

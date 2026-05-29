@@ -1,6 +1,6 @@
 """健康检查接口测试。"""
-from fastapi.testclient import TestClient
 from app.main import app
+from fastapi.testclient import TestClient
 
 client = TestClient(app)
 

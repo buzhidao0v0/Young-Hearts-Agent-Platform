@@ -1,8 +1,8 @@
 """数据库引擎、会话工厂与 Base 声明模块。"""
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
 from py_config.settings import settings
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 engine = create_engine(settings.DB_URL, future=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

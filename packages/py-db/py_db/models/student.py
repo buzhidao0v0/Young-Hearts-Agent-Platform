@@ -1,7 +1,8 @@
 """学生 ORM 模型定义。"""
 
-from sqlalchemy import Column, BigInteger, String, DateTime, ForeignKeyConstraint
+from sqlalchemy import BigInteger, Column, DateTime, String
 from sqlalchemy.sql import func
+
 from py_db.session import Base
 
 

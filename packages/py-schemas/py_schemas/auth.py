@@ -1,7 +1,5 @@
 """认证相关 Schema 定义模块。"""
 
-from datetime import datetime
-from typing import Optional
 
 from py_schemas.base import BaseSchema
 
@@ -25,9 +23,9 @@ class UserInfo(BaseSchema):
 
     id: int
     username: str
-    email: Optional[str] = None
-    nickname: Optional[str] = None
-    avatar: Optional[str] = None
+    email: str | None = None
+    nickname: str | None = None
+    avatar: str | None = None
     roles: list[str] = []
     status: str = "active"
     is_active: bool = True

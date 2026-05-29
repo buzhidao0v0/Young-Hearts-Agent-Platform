@@ -1,13 +1,12 @@
 """会话数据访问层：CRUD 与有效性校验。"""
 
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
+from app.models.user import Session as SessionModel
+from app.models.user import User
+from app.repositories.user_repository import get_user_by_id
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-
-from app.models.user import Session as SessionModel, User
-from app.repositories.user_repository import get_user_by_id
 
 
 def create_session(db: Session, session: SessionModel) -> SessionModel:
@@ -46,13 +45,19 @@ def get_valid_session(db: Session, session_id: str) -> SessionModel:
         raise HTTPException(status_code=401, detail=f"Session 失效或不存在（session_id={session_id}）")
     expired_at = getattr(session, "expired_at", None)
     if expired_at is not None and isinstance(expired_at, datetime):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if expired_at.tzinfo is None:
-            expired_at = expired_at.replace(tzinfo=timezone.utc)
+            expired_at = expired_at.replace(tzinfo=UTC)
         else:
-            expired_at = expired_at.astimezone(timezone.utc)
+            expired_at = expired_at.astimezone(UTC)
         if expired_at < now:
-            raise HTTPException(status_code=401, detail=f"Session 已过期（session_id={session_id}，expired_at={expired_at.isoformat()}，now={now.isoformat()}）")
+            raise HTTPException(
+                status_code=401,
+                detail=(
+                    f"Session 已过期（session_id={session_id}，"
+                    f"expired_at={expired_at.isoformat()}，now={now.isoformat()}）"
+                ),
+            )
     return session
 
 

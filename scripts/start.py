@@ -9,9 +9,9 @@ import threading
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils"))
-from process_utils import launch_process, graceful_terminate, is_process_alive
-from log_utils import print_stage_header, print_service_log, print_colored, print_banner, print_shutdown_progress
 from check_utils import run_preflight_checks
+from log_utils import print_banner, print_colored, print_service_log, print_shutdown_progress, print_stage_header
+from process_utils import graceful_terminate, is_process_alive, launch_process
 
 SERVICE_COMMANDS = {
     "api": ["python", "-m", "uvicorn", "app.main:app", "--reload", "--port", "8000"],

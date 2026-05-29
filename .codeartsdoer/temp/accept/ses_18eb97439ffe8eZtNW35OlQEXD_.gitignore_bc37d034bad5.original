@@ -83,3 +83,7 @@ uv.lock
 *.egg-info/
 .mypy_cache/
 .ruff_cache/
+.husky/
+
+# Docs artifacts
+apps/api-server/openapi.json

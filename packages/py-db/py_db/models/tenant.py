@@ -1,7 +1,8 @@
 """租户与租户用户角色 ORM 模型定义。"""
 
-from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, JSON
+from sqlalchemy import JSON, BigInteger, Column, DateTime, String
 from sqlalchemy.sql import func
+
 from py_db.session import Base
 
 

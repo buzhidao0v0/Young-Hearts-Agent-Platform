@@ -1,15 +1,19 @@
 """用户业务：创建、查询、更新与删除。"""
 
-from sqlalchemy.orm import Session
-
 from app.models.user import User
-from app.repositories.user_repository import get_user_by_username as _get_by_username, get_user_by_id as _get_by_id, create_user as _create_user, update_user as _update_user, delete_user as _delete_user
+from app.repositories.user_repository import create_user as _create_user
+from app.repositories.user_repository import delete_user as _delete_user
+from app.repositories.user_repository import get_user_by_id as _get_by_id
+from app.repositories.user_repository import get_user_by_username as _get_by_username
+from app.repositories.user_repository import update_user as _update_user
+from sqlalchemy.orm import Session
 
 
 def create_user(db: Session, user_in):
     """创建用户，roles 支持多角色，兼容 UserRegisterRequest。"""
-    from app.services.auth import get_password_hash
     import json
+
+    from app.services.auth import get_password_hash
     user = User(
         username=user_in.username,
         email=getattr(user_in, "email", None),

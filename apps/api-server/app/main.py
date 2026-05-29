@@ -1,12 +1,13 @@
 """FastAPI 应用入口，注册中间件与路由。"""
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.v1.routes import auth as auth_router
 from app.core.config import settings
 from app.db.session import init_db
-from app.api.v1.routes import auth as auth_router
 from app.utils_openapi import generate_openapi_json
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 
 @asynccontextmanager

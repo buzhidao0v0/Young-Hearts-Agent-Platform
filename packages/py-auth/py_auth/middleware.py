@@ -1,6 +1,7 @@
 """认证中间件与依赖注入模块。"""
 
-from fastapi import Depends, HTTPException, Request, status
+from collections.abc import Callable
+from fastapi import HTTPException, Request, status
 
 
 async def require_auth(request: Request) -> Request:

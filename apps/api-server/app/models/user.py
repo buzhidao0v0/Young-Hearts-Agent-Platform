@@ -1,9 +1,8 @@
 """用户、志愿者、专家及会话 ORM 模型定义。"""
 
-from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, JSON, ForeignKeyConstraint
-from sqlalchemy.sql import func
 from py_db.models import Base
-
+from sqlalchemy import JSON, BigInteger, Boolean, Column, DateTime, ForeignKeyConstraint, String
+from sqlalchemy.sql import func
 
 
 # 用户主表
@@ -19,7 +18,10 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     nickname = Column(String(255))
     avatar = Column(String(512))
-    roles = Column(JSON, nullable=False, default=list, comment="用户角色，JSON 数组（如 ['user', 'admin']，原生 JSON 存储）")
+    roles = Column(
+        JSON, nullable=False, default=list,
+        comment="用户角色，JSON 数组（如 ['user', 'admin']，原生 JSON 存储）",
+    )
     status = Column(String(32), default="active")  # ['active', 'banned', 'pending_review']
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)

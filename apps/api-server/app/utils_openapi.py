@@ -1,9 +1,9 @@
 """OpenAPI Schema 生成与导出工具。"""
 
 import json
+
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
-import os
 
 
 def generate_openapi_json(app: FastAPI, output_path: str = "openapi.json"):

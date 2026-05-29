@@ -51,6 +51,12 @@ class NapCatClient:
             接口返回的 JSON 字典。
         """
         async with httpx.AsyncClient(base_url=self.base_url, timeout=30) as client:
-            resp = await client.post("/send_group_msg", json={"group_id": group_id, "message": [{"type": "text", "data": {"text": message}}]})
+            resp = await client.post(
+                "/send_group_msg",
+                json={
+                    "group_id": group_id,
+                    "message": [{"type": "text", "data": {"text": message}}],
+                },
+            )
             resp.raise_for_status()
             return resp.json()

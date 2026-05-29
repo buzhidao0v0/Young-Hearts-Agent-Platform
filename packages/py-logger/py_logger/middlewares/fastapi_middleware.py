@@ -3,13 +3,12 @@
 import time
 import uuid
 
+from py_logger.context import set_trace_id
+from py_logger.core import get_logger
+from py_logger.events import REQUEST_COMPLETED, REQUEST_RECEIVED
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
-
-from py_logger.context import set_trace_id, get_trace_id
-from py_logger.core import get_logger
-from py_logger.events import REQUEST_RECEIVED, REQUEST_COMPLETED
 
 logger = get_logger("middleware.request")
 

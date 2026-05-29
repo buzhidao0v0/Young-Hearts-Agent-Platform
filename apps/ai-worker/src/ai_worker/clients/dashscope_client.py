@@ -1,8 +1,8 @@
 """DashScope API 客户端封装模块。"""
 
 import httpx
-from py_config.settings import settings
 from py_ai_engine.llm_client import LLMClient
+from py_config.settings import settings
 
 
 class DashScopeClient:

@@ -2,20 +2,24 @@
 
 import json
 
-from fastapi import APIRouter, Request, Response, status, HTTPException, Depends
+from app.db.session import get_db
+from app.dependencies.deps import get_current_user, require_roles
+from app.schemas.user import ExpertProfileOut, UserLogin, UserOut, UserRegisterRequest, UserUpdate, VolunteerProfileOut
+from app.services import auth as auth_service
+from app.services.user_service import delete_user, update_user
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-
-from app.db.session import get_db
-from app.schemas.user import UserLogin, UserOut, UserUpdate, UserRegisterRequest, VolunteerProfileOut, ExpertProfileOut
-from app.services import auth as auth_service
-from app.services.user_service import get_user_by_username, update_user, delete_user
-from app.dependencies.deps import get_current_user, require_roles
 
 router = APIRouter()
 
 
-@router.get("/me", response_model=UserOut, summary="获取当前用户信息", description="返回当前登录用户的信息，敏感字段按角色脱敏")
+@router.get(
+    "/me",
+    response_model=UserOut,
+    summary="获取当前用户信息",
+    description="返回当前登录用户的信息，敏感字段按角色脱敏",
+)
 @require_roles(["user", "family", "volunteer", "expert", "admin"])
 async def read_users_me(current_user=Depends(get_current_user)):
     """获取当前登录用户信息，敏感字段按角色脱敏。"""
@@ -41,7 +45,12 @@ async def update_me(payload: UserUpdate, db: Session = Depends(get_db), current_
     return user
 
 
-@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT, summary="注销当前用户", description="仅允许本人或管理员注销")
+@router.delete(
+    "/me",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="注销当前用户",
+    description="仅允许本人或管理员注销",
+)
 @require_roles(["user", "family", "admin"])
 async def delete_me(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """注销当前用户，仅允许本人或管理员注销。"""
@@ -49,7 +58,12 @@ async def delete_me(db: Session = Depends(get_db), current_user=Depends(get_curr
     return None
 
 
-@router.post("/login", response_model=UserOut, summary="用户登录", description="登录成功后写 session 表，Web 端 set_cookie，App 端返回 session_id")
+@router.post(
+    "/login",
+    response_model=UserOut,
+    summary="用户登录",
+    description="登录成功后写 session 表，Web 端 set_cookie，App 端返回 session_id",
+)
 async def login(user_in: UserLogin, response: Response, request: Request, db: Session = Depends(get_db)):
     """用户登录，成功后写 session 表，Web 端 set_cookie，App 端返回 session_id。"""
     user, session_id = await auth_service.login(db, user_in, request)
@@ -71,7 +85,12 @@ async def logout(request: Request, response: Response, db: Session = Depends(get
     return {"msg": "logout success"}
 
 
-@router.post("/register", response_model=UserOut, summary="用户注册", description="支持多角色注册，自动创建 profile，事务一致性")
+@router.post(
+    "/register",
+    response_model=UserOut,
+    summary="用户注册",
+    description="支持多角色注册，自动创建 profile，事务一致性",
+)
 async def register(user_in: UserRegisterRequest, db: Session = Depends(get_db)):
     """用户注册，支持多角色注册，自动创建 profile，事务一致性。"""
     if any(role in ["admin", "maintainer"] for role in user_in.roles):
@@ -82,7 +101,7 @@ async def register(user_in: UserRegisterRequest, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=400, detail=f"注册失败: {e}")
 
-    from app.schemas.user import UserOut, VolunteerProfileOut, ExpertProfileOut
+    from app.schemas.user import UserOut
     user_dict = {**user.__dict__}
     roles = user_dict.get("roles")
     if isinstance(roles, str):
