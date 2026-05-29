@@ -5,44 +5,17 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.128-009688)](https://fastapi.tiangolo.com)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-基于 FastAPI + React 的全栈智能体平台，支持多租户权限、RAG 知识库检索与豆包大模型对接，为孤独症患者家属提供 24 小时 AI 咨询服务。
+基于 FastAPI + React 的全栈智能体平台，支持多租户权限、RAG 知识库检索与豆包大模型对接。
 
 ## 目录
 
-- [项目愿景](#项目愿景)
-- [设计原则](#设计原则)
 - [架构概览](#架构概览)
 - [快速启动](#快速启动)
 - [项目结构](#项目结构)
 - [API 端点速查](#api-端点速查)
 - [环境变量配置](#环境变量配置)
 - [开发指南](#开发指南)
-- [项目规范](#项目规范)
 - [贡献指南](#贡献指南)
-
-## 项目愿景
-
-### 短期目标
-
-1. 搭建专家智能体平台，基于孤独症干预、护理、康复等领域专业知识库，为家属提供 24 小时咨询服务
-2. 搭建可视化知识库建设平台，支持医护人员、康复师在线上传、标注、更新专业内容
-3. 整合志愿者招募、排班、服务记录等全流程管理功能
-4. 联合实践团将智能体初步投入应用，结合反馈持续优化
-
-### 中长期目标
-
-- 基于 RAG 技术不断提升智能体回答的准确性、全面性和实用性
-- 通过 AI 为孤独症患者提供个性化陪伴，融入兴趣点设计互动形式
-- 通过用户画像和情感分析，让 AI 适配患者的沟通习惯
-
-## 设计原则
-
-1. **单一职责**：每个模块（组件/Hook/文件/状态）只承担一个明确的功能
-2. **低耦合**：模块间通过明确的接口通信，避免直接依赖或修改其他模块内部逻辑
-3. **可复用/可扩展**：通用逻辑抽离为全局模块，接口预留、拆分粒度适配扩展
-4. **三层架构**：后端严格遵循 Router → Service → Repository 分层，禁止跨层调用
-5. **Feature-Based 聚合**：前端按业务功能聚合，每个 feature 内部自治
-6. **配置外置**：所有密钥、第三方地址、功能开关通过 `.env` 注入，禁止硬编码
 
 ## 架构概览
 
@@ -99,7 +72,7 @@ npm run dev:all
 Young-Hearts-Agent-Platform/
 ├─ apps/
 │  ├─ web-client/          # React 18 + Vite 前端
-│  ├─ api-server/          # FastAPI 网关（三层架构）
+│  ├─ api-server/          # FastAPI 网关
 │  └─ ai-worker/           # Celery Worker
 ├─ packages/
 │  ├─ py-config/           # Pydantic-settings 全局配置
@@ -109,10 +82,11 @@ Young-Hearts-Agent-Platform/
 │  ├─ py-ai-engine/        # LLM HTTPX 客户端
 │  ├─ py-logger/           # structlog 结构化日志
 │  ├─ py-messaging/        # WxPusher + NapCatQQ 消息
-│  └─ ts-shared/           # TypeScript 共享枚举和类型
-├─ infrastructure/          # Docker / Nginx / 可观测性（预留）
+│  ├─ ts-shared/           # TypeScript 共享枚举和类型
+│  └─ ts-config/           # TS/ESLint/Vite 共享配置（占位）
 ├─ scripts/                # 统一启动脚本
 ├─ tests/                  # 根级集成测试
+├─ docs/                   # 文档
 └─ 规范/                   # 项目规范文件
 ```
 
@@ -157,17 +131,11 @@ npm run lint             # Ruff + ESLint
 npm run lint:fix         # 自动修复
 
 # Python 共享包安装
+pip install -e packages/py-config
+pip install -e packages/py-db
+# ... 或使用 uv
 uv sync --all-packages
 ```
-
-## 项目规范
-
-| 规范文件 | 说明 |
-|----------|------|
-| [项目结构规范](规范/智院灵枢(SAP)-项目结构.md) | Hybrid Monorepo 目录结构、Feature-Based 聚合、三层架构 |
-| [启动脚本规范](规范/单体仓库全栈项目启动脚本规范%20(Monorepo%20Fullsta.md) | 三阶段布局、前置检查、信号处理 |
-| [日志规范](规范/智院灵枢(SAP)-日志规范.md) | structlog 结构化日志、事件命名、trace_id |
-| [注释规范](规范/注释规范.md) | Google Style Docstring、TSDoc、TODO 标记 |
 
 ## 贡献指南
 

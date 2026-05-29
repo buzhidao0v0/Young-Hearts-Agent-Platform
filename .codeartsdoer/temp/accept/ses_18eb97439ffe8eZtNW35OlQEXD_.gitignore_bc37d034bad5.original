@@ -1,4 +1,4 @@
-﻿# 环境配置
+# 环境配置
 .env
 .env.local
 .env.*.local
@@ -83,7 +83,3 @@ uv.lock
 *.egg-info/
 .mypy_cache/
 .ruff_cache/
-.husky/
-
-# Docs artifacts
-apps/api-server/openapi.json
