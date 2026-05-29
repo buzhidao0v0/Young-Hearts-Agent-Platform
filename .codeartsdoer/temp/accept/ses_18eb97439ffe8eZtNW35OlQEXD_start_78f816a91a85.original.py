@@ -1,140 +1,135 @@
 #!/usr/bin/env python3
+import argparse
 import os
-import sys
-import uuid
 import signal
-import subprocess
-from dotenv import load_dotenv
+import sys
+import threading
+import time
 
-# 加载环境变量
-load_dotenv()
-
-# 注入全局启动trace_id
-STARTUP_TRACE_ID = str(uuid.uuid4())
-os.environ["STARTUP_TRACE_ID"] = STARTUP_TRACE_ID
-
-# 导入工具函数，直接从文件导入
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils"))
-from check_utils import validate_env, check_port
+from process_utils import launch_process, graceful_terminate, is_process_alive
+from log_utils import print_stage_header, print_service_log, print_colored
+from check_utils import run_preflight_checks
 
-def print_stage_header(title: str) -> None:
-    """打印阶段分隔标题"""
-    print(f"\n{'='*60}")
-    print(f"🚀 {title}")
-    print('='*60)
+SERVICE_COMMANDS = {
+    "api": ["python", "-m", "uvicorn", "app.main:app", "--reload", "--port", "8000"],
+    "web": ["pnpm", "--dir", "apps/web-client", "run", "dev"],
+    "worker": ["celery", "-A", "src.ai_worker.celery_app", "worker", "--loglevel=info"],
+}
 
-def print_service_status(service: str, status: str, pid: int = None) -> None:
-    """打印服务状态"""
-    status_map = {
-        "started": "✔",
-        "starting": "●",
-        "stopped": "✘"
-    }
-    pid_info = f" (PID: {pid})" if pid else ""
-    print(f"{status_map.get(status, ' ')} {service.upper()} 服务 {status}{pid_info}")
+SERVICE_CWD = {
+    "api": "apps/api-server",
+    "web": ".",
+    "worker": "apps/ai-worker",
+}
 
-def launch_service(command: str, service_name: str) -> subprocess.Popen:
-    """启动服务进程"""
-    env = os.environ.copy()
-    env["SERVICE_NAME"] = service_name
-    
-    proc = subprocess.Popen(
-        command,
-        shell=True,
-        env=env,
-        stdout=sys.stdout,
-        stderr=sys.stderr,
-        text=True
-    )
-    return proc
+SERVICE_PORTS = {
+    "api": 8000,
+    "web": 5173,
+}
 
-def graceful_terminate(proc: subprocess.Popen, timeout: int = 5) -> None:
-    """优雅终止进程"""
+processes: list[tuple[str, object]] = []
+shutdown_requested = False
+
+
+def _stream_output(name: str, proc: object) -> None:
     try:
-        if sys.platform == "win32":
-            proc.send_signal(signal.CTRL_C_EVENT)
-        else:
-            proc.send_signal(signal.SIGTERM)
-        proc.wait(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        proc.kill()
+        for line in iter(proc.stdout.readline, ""):
+            if not line:
+                break
+            print_service_log(name, line)
+    except (ValueError, OSError):
+        pass
 
-processes = []
 
-def signal_handler(signum, frame):
-    """优雅终止信号处理"""
+def signal_handler(signum: int, frame: object) -> None:
+    global shutdown_requested
+    if shutdown_requested:
+        return
+    shutdown_requested = True
     print_stage_header("正在停止所有服务")
-    for proc in reversed(processes):
-        graceful_terminate(proc)
-    print("所有服务已停止")
+    for name, proc in reversed(processes):
+        if is_process_alive(proc):
+            print_colored(f"  终止 {name} (PID: {proc.pid})...", "yellow")
+            graceful_terminate(proc)
+    print_colored("所有服务已停止", "green")
     sys.exit(0)
 
-def main(services: list):
-    # 注册信号处理
+
+def interactive_menu() -> list[str]:
+    print_colored("\n  心青年智能体平台 - 启动控制台", "bold")
+    print_colored("  ─────────────────────────────", "cyan")
+    print("  [1] API Server    (FastAPI :8000)")
+    print("  [2] AI Worker     (Celery)")
+    print("  [3] Web Client    (Vite :5173)")
+    print("  [4] All           (API + Worker + Web)")
+    print("  [q] Quit")
+    choice = input("\n  请选择 > ").strip().lower()
+    mapping = {"1": ["api"], "2": ["worker"], "3": ["web"], "4": ["api", "worker", "web"]}
+    return mapping.get(choice, [])
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="心青年智能体平台 - 统一启动脚本")
+    parser.add_argument("--services", type=str, help="逗号分隔的服务组合: api,worker,web")
+    parser.add_argument("--env-file", type=str, default=".env", help="环境文件路径（默认 .env）")
+    args = parser.parse_args()
+
+    services: list[str] = []
+    if args.services:
+        services = [s.strip() for s in args.services.split(",")]
+    elif sys.stdin.isatty():
+        services = interactive_menu()
+    else:
+        print_colored("CI 环境：请使用 --services 参数指定服务", "red")
+        sys.exit(1)
+
+    if not services:
+        sys.exit(0)
+
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
-    # 前置检查阶段
-    print_stage_header("前置环境检查")
-    
-    valid, err = validate_env()
-    if not valid:
-        print(f"✘ 环境校验失败: {err}")
+    print_stage_header("阶段一：前置环境检查")
+    if not run_preflight_checks(services, env_file=args.env_file):
+        print_colored("前置检查失败，启动中止", "red")
         sys.exit(1)
-    
-    # 端口检查
-    required_ports = {
-        "api": 8000,
-        "web": 5173
-    }
-    
-    for service in services:
-        if service in required_ports:
-            port = required_ports[service]
-            if not check_port(port):
-                print(f"✘ {service} 端口 {port} 已被占用，请先关闭占用进程")
-                sys.exit(1)
-    
-    print("✔ 所有检查项通过")
+    print_colored("所有前置检查通过", "green")
 
-    # 服务启动阶段
-    print_stage_header("启动服务")
-    service_commands = {
-        "api": "cd apps/api-server && python -m uvicorn app.main:app --reload --port 8000",
-        "web": "cd apps/web-client && npm run dev",
-        "worker": "cd apps/api-server && celery -A app.core.celery_app worker --loglevel=info"
-    }
-
-    for service in services:
-        if service not in service_commands:
-            print(f"⚠ 未知服务: {service}")
+    print_stage_header("阶段二：启动服务")
+    original_cwd = os.getcwd()
+    for name in services:
+        if name not in SERVICE_COMMANDS:
+            print_colored(f"  未知服务: {name}", "yellow")
             continue
-        
-        proc = launch_service(service_commands[service], service_name=service)
-        processes.append(proc)
-        print_service_status(service, "started", pid=proc.pid)
+        cwd = SERVICE_CWD.get(name, ".")
+        os.chdir(os.path.join(original_cwd, cwd))
+        proc = launch_process(SERVICE_COMMANDS[name])
+        os.chdir(original_cwd)
+        processes.append((name, proc))
+        print_colored(f"  ✔ {name.upper()} 已启动 (PID: {proc.pid})", "green")
+        t = threading.Thread(target=_stream_output, args=(name, proc), daemon=True)
+        t.start()
 
-    print_stage_header("服务已全部启动成功")
-    print(f"📝 启动Trace ID: {STARTUP_TRACE_ID}")
-    print(f"🌐 前端地址: http://localhost:5173")
-    print(f"🔌 后端文档: http://localhost:8000/docs")
-    print(f"\n按 Ctrl+C 停止所有服务")
+    print_stage_header("阶段三：运行中")
+    for name in services:
+        port = SERVICE_PORTS.get(name)
+        if port:
+            if name == "api":
+                print_colored(f"  后端文档: http://localhost:{port}/docs", "cyan")
+            elif name == "web":
+                print_colored(f"  前端地址: http://localhost:{port}", "cyan")
+    print_colored("\n  按 Ctrl+C 停止所有服务", "yellow")
 
-    # 等待进程结束
-    for proc in processes:
-        proc.wait()
+    try:
+        while not shutdown_requested:
+            for name, proc in processes:
+                if not is_process_alive(proc):
+                    print_colored(f"  ⚠ {name} 进程已退出 (code: {proc.returncode})", "red")
+            time.sleep(2)
+    except KeyboardInterrupt:
+        signal_handler(signal.SIGINT, None)
+
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("用法: python start.py [all|api|web|worker]")
-        sys.exit(1)
-    
-    target = sys.argv[1].lower()
-    services = []
-    
-    if target == "all":
-        services = ["api", "web"]
-    else:
-        services = [target]
-    
-    main(services)
+    main()

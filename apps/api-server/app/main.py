@@ -9,6 +9,13 @@ from app.utils_openapi import generate_openapi_json
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    try:
+        from py_logger import configure_logging
+        configure_logging()
+    except ImportError:
+        import logging
+        logging.basicConfig(level=logging.INFO)
+        logging.warning("py-logger 不可用，降级为标准 logging")
     init_db()
     generate_openapi_json(app, output_path="openapi.json")
     yield
@@ -24,6 +31,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+try:
+    from py_logger.middlewares.fastapi_middleware import RequestLoggingMiddleware
+    app.add_middleware(RequestLoggingMiddleware)
+except ImportError:
+    pass
 
 app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
 

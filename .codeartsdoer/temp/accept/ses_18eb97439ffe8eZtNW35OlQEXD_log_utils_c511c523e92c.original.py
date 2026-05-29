@@ -38,37 +38,7 @@ def print_check_result(name: str, passed: bool, detail: str = "") -> None:
 
 
 def print_service_log(service_name: str, message: str) -> None:
-    max_width = 8
-    padded = service_name.upper().ljust(max_width)
-    prefix = _color(f"[{padded}]", "cyan")
+    prefix = _color(f"[{service_name}]", "cyan")
     line = message.rstrip()
     if line:
         print(f"{prefix} {line}")
-
-
-def print_banner() -> None:
-    title = "心青年智能体平台"
-    version = "v1.0.0"
-    inner_width = 44
-    title_line = f"  {title}  {version}".center(inner_width)
-    lines = [
-        "╔" + "═" * inner_width + "╗",
-        "║" + title_line + "║",
-        "╚" + "═" * inner_width + "╝",
-    ]
-    for line in lines:
-        print(_color(line, "cyan"))
-    print()
-
-
-def print_shutdown_progress(name: str, pid: int, status: str) -> None:
-    if status == "ok":
-        mark = _color("✔", "green")
-        label = "已关闭"
-    elif status == "timeout":
-        mark = _color("⚠", "yellow")
-        label = "强制终止"
-    else:
-        mark = "→"
-        label = "正在终止..."
-    print(f"  {mark} {name} (PID: {pid}) {label}")

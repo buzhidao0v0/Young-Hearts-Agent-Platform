@@ -102,49 +102,21 @@ async def logout(request: Request):
         db.commit()
 
 # 注册：字段与校验对齐 API 设计
-async def register(db, user_in):
-    """注册：字段与校验对齐 API 设计，使用 repository 层。"""
-    from app.models.user import User, VolunteerProfile, ExpertProfile
-    import json as _json
+async def register(user_in):
+    db: Session = next(get_db())
+    if db.query(User).filter(User.username == user_in.username).first():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists")
     user = User(
         username=user_in.username,
-        email=getattr(user_in, "email", None),
-        gender=getattr(user_in, "gender", "hidden"),
-        password_hash=get_password_hash(user_in.password),
+        email=user_in.email,
         nickname=getattr(user_in, "nickname", None),
         avatar=getattr(user_in, "avatar", None),
         roles=str(user_in.roles) if user_in.roles else '[]',
         status=user_in.status or "active",
         is_active=True,
+        password_hash=get_password_hash(user_in.password)
     )
     db.add(user)
-    db.flush()
-    if "volunteer" in user_in.roles and user_in.volunteer_info is not None:
-        v = user_in.volunteer_info
-        vp = VolunteerProfile(
-            user_id=user.id,
-            full_name=getattr(v, "full_name", None),
-            phone=getattr(v, "phone", None),
-            public_email=getattr(v, "public_email", None),
-            is_public_visible=getattr(v, "is_public_visible", False),
-            skills=str(getattr(v, "skills", []) or []),
-            status="pending",
-            work_status="offline",
-        )
-        db.add(vp)
-    if "expert" in user_in.roles and user_in.expert_info is not None:
-        e = user_in.expert_info
-        ep = ExpertProfile(
-            user_id=user.id,
-            full_name=getattr(e, "full_name", None),
-            phone=getattr(e, "phone", None),
-            public_email=getattr(e, "public_email", None),
-            title=getattr(e, "title", None),
-            org=getattr(e, "org", None),
-            skills=str(getattr(e, "skills", []) or []),
-            status="pending",
-        )
-        db.add(ep)
     db.commit()
     db.refresh(user)
     return user

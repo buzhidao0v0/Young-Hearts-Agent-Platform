@@ -20,6 +20,6 @@ def init_db():
         from app.models import Base
 
         Base.metadata.create_all(bind=engine)
-    except (ImportError, AttributeError):
+    except Exception:
         # if no models defined yet, ignore
         pass

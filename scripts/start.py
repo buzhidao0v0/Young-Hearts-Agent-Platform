@@ -8,7 +8,7 @@ import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils"))
 from process_utils import launch_process, graceful_terminate, is_process_alive
-from log_utils import print_stage_header, print_service_log, print_colored
+from log_utils import print_stage_header, print_service_log, print_colored, print_banner, print_shutdown_progress
 from check_utils import run_preflight_checks
 
 SERVICE_COMMANDS = {
@@ -50,8 +50,12 @@ def signal_handler(signum: int, frame: object) -> None:
     print_stage_header("正在停止所有服务")
     for name, proc in reversed(processes):
         if is_process_alive(proc):
-            print_colored(f"  终止 {name} (PID: {proc.pid})...", "yellow")
+            print_shutdown_progress(name, proc.pid, "stopping")
             graceful_terminate(proc)
+            if is_process_alive(proc):
+                print_shutdown_progress(name, proc.pid, "timeout")
+            else:
+                print_shutdown_progress(name, proc.pid, "ok")
     print_colored("所有服务已停止", "green")
     sys.exit(0)
 
@@ -89,6 +93,8 @@ def main() -> None:
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
+
+    print_banner()
 
     print_stage_header("阶段一：前置环境检查")
     if not run_preflight_checks(services, env_file=args.env_file):

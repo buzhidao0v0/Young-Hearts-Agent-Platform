@@ -16,12 +16,6 @@ celery_app.conf.update(
     task_track_started=True,
     task_acks_late=True,
     worker_prefetch_multiplier=1,
-    beat_schedule={
-        "scan-pending-notices": {
-            "task": "ai_worker.tasks.scan_pending_notices",
-            "schedule": 60.0,
-        },
-    },
 )
 
 celery_app.autodiscover_tasks(["ai_worker.tasks"])
