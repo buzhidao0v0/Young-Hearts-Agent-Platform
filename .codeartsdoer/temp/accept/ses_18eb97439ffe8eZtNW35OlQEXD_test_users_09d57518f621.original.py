@@ -1,4 +1,3 @@
-"""用户注册/登录/登出/角色权限接口测试。"""
 import uuid
 import time
 from fastapi.testclient import TestClient
@@ -7,7 +6,6 @@ from app.main import app
 client = TestClient(app)
 
 def register_user(username, password, roles=None):
-    """注册用户辅助函数。"""
     payload = {
         "username": username,
         "password": password,
@@ -24,7 +22,6 @@ def register_user(username, password, roles=None):
     return r.json()
 
 def login_user(username, password, use_cookie=False):
-    """登录用户辅助函数，支持 cookie 或 header 模式。"""
     r = client.post("/auth/login", json={"username": username, "password": password})
     assert r.status_code == 200, r.text
     data = r.json()
@@ -37,7 +34,6 @@ def login_user(username, password, use_cookie=False):
     return session_id, {"X-Session-ID": session_id}
 
 def logout_user(session_id=None, cookies=None):
-    """登出用户辅助函数。"""
     if cookies:
         r = client.post("/auth/logout", cookies=cookies)
     elif session_id:
@@ -47,7 +43,6 @@ def logout_user(session_id=None, cookies=None):
     assert r.status_code == 200, r.text
 
 def get_me(headers=None, cookies=None):
-    """获取当前用户信息辅助函数。"""
     if cookies:
         r = client.get("/users/me", cookies=cookies)
     elif headers:
@@ -57,7 +52,6 @@ def get_me(headers=None, cookies=None):
     return r
 
 def test_register_login_logout_web_and_app():
-    """测试 Web/App 端注册→登录→登出完整流程。"""
     username = f"webappuser_{uuid.uuid4().hex[:8]}"
     password = "testpass123"
     # 注册
@@ -81,7 +75,6 @@ def test_register_login_logout_web_and_app():
     assert r4.status_code == 401
 
 def test_role_permission_and_sensitive_field():
-    """测试角色权限校验和敏感字段脱敏。"""
     # 注册多角色用户
     username = f"roleuser_{uuid.uuid4().hex[:8]}"
     password = "testpass123"
@@ -102,7 +95,6 @@ def test_role_permission_and_sensitive_field():
     # assert "sensitive_field" not in r3.json()  # 示例
 
 def test_session_expiry():
-    """测试会话过期后返回 401。"""
     username = f"expireuser_{uuid.uuid4().hex[:8]}"
     password = "testpass123"
     register_user(username, password)
@@ -113,7 +105,6 @@ def test_session_expiry():
     assert r.status_code == 401
 
 def test_register_duplicate():
-    """测试重复注册返回 400/409。"""
     username = f"dupuser_{uuid.uuid4().hex[:8]}"
     password = "testpass123"
     register_user(username, password)
