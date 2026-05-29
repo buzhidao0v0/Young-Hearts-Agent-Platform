@@ -1,3 +1,5 @@
+"""请求日志中间件模块。"""
+
 import time
 import uuid
 
@@ -13,7 +15,18 @@ logger = get_logger("middleware.request")
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    """请求日志中间件，记录请求/响应信息并注入 Trace-ID。"""
+
     async def dispatch(self, request: Request, call_next) -> Response:
+        """拦截请求，注入 Trace-ID 并记录请求/响应日志。
+
+        Args:
+            request: 当前请求对象。
+            call_next: 下一个中间件或路由处理函数。
+
+        Returns:
+            响应对象。
+        """
         trace = request.headers.get("X-Trace-ID", uuid.uuid4().hex[:16])
         set_trace_id(trace)
         start = time.perf_counter()

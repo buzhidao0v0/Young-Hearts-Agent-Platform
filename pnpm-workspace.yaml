@@ -1,3 +1,5 @@
 packages:
   - "apps/web-client"
   - "packages/ts-*"
+allowBuilds:
+  esbuild: true

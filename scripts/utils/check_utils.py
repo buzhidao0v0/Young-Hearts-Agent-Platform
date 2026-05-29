@@ -1,3 +1,5 @@
+"""前置环境检查工具模块。"""
+
 import os
 import shutil
 import socket
@@ -6,6 +8,7 @@ from scripts.utils.log_utils import print_check_result
 
 
 def check_env_file(env_file: str = ".env") -> tuple[bool, str]:
+    """检查 .env 文件是否存在。"""
     if os.path.isfile(env_file):
         print_check_result(f".env 文件存在 ({env_file})", True)
         return True, ""
@@ -14,6 +17,7 @@ def check_env_file(env_file: str = ".env") -> tuple[bool, str]:
 
 
 def check_python_env() -> tuple[bool, str]:
+    """检查 Python 环境是否可用。"""
     if shutil.which("python") or shutil.which("python3"):
         print_check_result("Python 环境", True)
         return True, ""
@@ -22,6 +26,7 @@ def check_python_env() -> tuple[bool, str]:
 
 
 def check_node_env() -> tuple[bool, str]:
+    """检查 Node + pnpm 环境是否可用。"""
     if shutil.which("node") and shutil.which("pnpm"):
         print_check_result("Node + pnpm 环境", True)
         return True, ""
@@ -35,6 +40,7 @@ def check_node_env() -> tuple[bool, str]:
 
 
 def check_port(port: int, host: str = "localhost") -> tuple[bool, str]:
+    """检查指定端口是否可用。"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.connect((host, port))
@@ -46,6 +52,7 @@ def check_port(port: int, host: str = "localhost") -> tuple[bool, str]:
 
 
 def check_redis(host: str = "localhost", port: int = 6379) -> tuple[bool, str]:
+    """检查 Redis 连通性。"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.settimeout(3)
@@ -58,6 +65,7 @@ def check_redis(host: str = "localhost", port: int = 6379) -> tuple[bool, str]:
 
 
 def check_mysql(host: str = "localhost", port: int = 3306) -> tuple[bool, str]:
+    """检查 MySQL 连通性（弱依赖，仅警告）。"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.settimeout(3)
@@ -70,6 +78,7 @@ def check_mysql(host: str = "localhost", port: int = 3306) -> tuple[bool, str]:
 
 
 def run_preflight_checks(services: list[str], env_file: str = ".env") -> bool:
+    """执行所有前置环境检查，返回是否全部通过。"""
     all_passed = True
 
     ok, _ = check_env_file(env_file)

@@ -1,3 +1,5 @@
+"""认证与用户管理 API 路由。"""
+
 import json
 
 from fastapi import APIRouter, Request, Response, status, HTTPException, Depends
@@ -16,6 +18,7 @@ router = APIRouter()
 @router.get("/me", response_model=UserOut, summary="获取当前用户信息", description="返回当前登录用户的信息，敏感字段按角色脱敏")
 @require_roles(["user", "family", "volunteer", "expert", "admin"])
 async def read_users_me(current_user=Depends(get_current_user)):
+    """获取当前登录用户信息，敏感字段按角色脱敏。"""
     if hasattr(current_user, 'dict'):
         user_dict = current_user.dict()
     elif hasattr(current_user, '__dict__'):
@@ -30,6 +33,7 @@ async def read_users_me(current_user=Depends(get_current_user)):
 @router.put("/me", response_model=UserOut, summary="更新当前用户信息", description="仅允许本人或管理员修改")
 @require_roles(["user", "family", "admin"])
 async def update_me(payload: UserUpdate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    """更新当前用户信息，仅允许本人或管理员修改。"""
     data = payload.dict(exclude_unset=True)
     if "password" in data:
         data.pop("password")
@@ -40,12 +44,14 @@ async def update_me(payload: UserUpdate, db: Session = Depends(get_db), current_
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT, summary="注销当前用户", description="仅允许本人或管理员注销")
 @require_roles(["user", "family", "admin"])
 async def delete_me(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    """注销当前用户，仅允许本人或管理员注销。"""
     delete_user(db, current_user)
     return None
 
 
 @router.post("/login", response_model=UserOut, summary="用户登录", description="登录成功后写 session 表，Web 端 set_cookie，App 端返回 session_id")
 async def login(user_in: UserLogin, response: Response, request: Request, db: Session = Depends(get_db)):
+    """用户登录，成功后写 session 表，Web 端 set_cookie，App 端返回 session_id。"""
     user, session_id = await auth_service.login(db, user_in, request)
     user_agent = request.headers.get("user-agent", "")
     if "web" in user_agent.lower():
@@ -57,6 +63,7 @@ async def login(user_in: UserLogin, response: Response, request: Request, db: Se
 
 @router.post("/logout", summary="用户登出", description="清理 session 表记录，清除 Cookie/Header")
 async def logout(request: Request, response: Response, db: Session = Depends(get_db)):
+    """用户登出，清理 session 表记录，清除 Cookie/Header。"""
     await auth_service.logout(db, request)
     user_agent = request.headers.get("user-agent", "")
     if "web" in user_agent.lower():
@@ -66,6 +73,7 @@ async def logout(request: Request, response: Response, db: Session = Depends(get
 
 @router.post("/register", response_model=UserOut, summary="用户注册", description="支持多角色注册，自动创建 profile，事务一致性")
 async def register(user_in: UserRegisterRequest, db: Session = Depends(get_db)):
+    """用户注册，支持多角色注册，自动创建 profile，事务一致性。"""
     if any(role in ["admin", "maintainer"] for role in user_in.roles):
         raise HTTPException(status_code=403, detail="管理员/维护人员仅允许后台创建")
     try:

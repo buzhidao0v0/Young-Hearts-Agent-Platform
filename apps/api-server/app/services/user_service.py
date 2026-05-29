@@ -1,3 +1,5 @@
+"""用户业务：创建、查询、更新与删除。"""
+
 from sqlalchemy.orm import Session
 
 from app.models.user import User

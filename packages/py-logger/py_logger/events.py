@@ -1,3 +1,5 @@
+"""业务事件常量定义模块。"""
+
 AUTH_LOGIN_SUCCEEDED = "auth_login_succeeded"
 AUTH_LOGIN_FAILED = "auth_login_failed"
 AUTH_LOGOUT_SUCCEEDED = "auth_logout_succeeded"

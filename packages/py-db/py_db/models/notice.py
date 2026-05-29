@@ -1,9 +1,13 @@
+"""通知与通知接收人 ORM 模型定义。"""
+
 from sqlalchemy import Column, BigInteger, String, Text, DateTime, JSON, ForeignKeyConstraint
 from sqlalchemy.sql import func
 from py_db.session import Base
 
 
 class Notice(Base):
+    """通知表 ORM 模型，对应 notices 表。"""
+
     __tablename__ = "notices"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
@@ -19,6 +23,8 @@ class Notice(Base):
 
 
 class NoticeRecipient(Base):
+    """通知接收人表 ORM 模型，对应 notice_recipients 表。"""
+
     __tablename__ = "notice_recipients"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)

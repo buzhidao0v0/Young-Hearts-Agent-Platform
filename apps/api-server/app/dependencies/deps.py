@@ -1,3 +1,5 @@
+"""FastAPI 依赖注入：当前用户与角色校验。"""
+
 import json
 from datetime import datetime, timezone
 

@@ -1,3 +1,5 @@
+"""数据库引擎、会话工厂与 Base 声明模块。"""
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from py_config.settings import settings
@@ -8,6 +10,7 @@ Base = declarative_base()
 
 
 def get_db():
+    """获取数据库会话，用于依赖注入。"""
     db = SessionLocal()
     try:
         yield db
@@ -16,6 +19,7 @@ def get_db():
 
 
 def init_db():
+    """初始化数据库，创建所有表。"""
     try:
         Base.metadata.create_all(bind=engine)
     except Exception:

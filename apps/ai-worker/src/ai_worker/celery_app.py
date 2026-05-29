@@ -1,3 +1,5 @@
+"""Celery 应用实例与定时任务配置。"""
+
 from celery import Celery
 from py_config.settings import settings
 

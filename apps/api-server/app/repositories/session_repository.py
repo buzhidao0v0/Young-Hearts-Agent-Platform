@@ -1,3 +1,5 @@
+"""会话数据访问层：CRUD 与有效性校验。"""
+
 from datetime import datetime, timezone
 from typing import Optional
 

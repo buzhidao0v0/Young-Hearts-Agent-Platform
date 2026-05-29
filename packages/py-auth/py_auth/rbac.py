@@ -1,3 +1,5 @@
+"""基于角色的访问控制（RBAC）模块。"""
+
 import json
 from functools import wraps
 from typing import Any, Callable
@@ -6,6 +8,7 @@ from fastapi import HTTPException, status
 
 
 def has_role(user: Any, role: str) -> bool:
+    """判断用户是否拥有指定角色。"""
     roles = getattr(user, "roles", [])
     if isinstance(roles, str):
         try:
@@ -16,6 +19,7 @@ def has_role(user: Any, role: str) -> bool:
 
 
 def require_role(*required_roles: str) -> Callable:
+    """角色校验装饰器工厂，校验 current_user.roles 是否包含所需角色。"""
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(*args: object, **kwargs: object) -> Any:

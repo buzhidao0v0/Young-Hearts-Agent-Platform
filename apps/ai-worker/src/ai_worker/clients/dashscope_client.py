@@ -1,3 +1,5 @@
+"""DashScope API 客户端封装模块。"""
+
 import httpx
 from py_config.settings import settings
 from py_ai_engine.llm_client import LLMClient
@@ -7,6 +9,7 @@ class DashScopeClient:
     """DashScope API 客户端，封装 LLM 调用与嵌入。"""
 
     def __init__(self) -> None:
+        """初始化实例，设置核心属性。"""
         self._llm = LLMClient()
 
     async def chat_completion(self, model: str, messages: list[dict], **kwargs: object) -> dict:

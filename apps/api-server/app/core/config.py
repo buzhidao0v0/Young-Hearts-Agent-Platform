@@ -1,7 +1,11 @@
+"""应用全局配置模块。"""
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """应用全局配置，从环境变量或 .env 文件加载。"""
+
     APP_NAME: str = "心青年智能体平台 - Backend"
     DB_URL: str = "sqlite:///./dev.db"
     VECTOR_STORE: str = "chroma"

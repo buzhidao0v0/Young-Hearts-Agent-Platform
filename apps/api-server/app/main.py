@@ -1,3 +1,5 @@
+"""FastAPI 应用入口，注册中间件与路由。"""
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,6 +11,7 @@ from app.utils_openapi import generate_openapi_json
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """应用生命周期：初始化日志、数据库与 OpenAPI 导出。"""
     try:
         from py_logger import configure_logging
         configure_logging()
@@ -43,4 +46,5 @@ app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
 
 @app.get("/health")
 def health():
+    """健康检查端点。"""
     return {"status": "ok"}

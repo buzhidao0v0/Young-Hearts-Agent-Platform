@@ -1,3 +1,5 @@
+"""认证业务：登录、登出、注册与密码校验。"""
+
 from datetime import datetime, timedelta, timezone
 from typing import cast
 
@@ -26,14 +28,17 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """校验明文密码与哈希是否匹配。"""
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
+    """对明文密码进行哈希。"""
     return pwd_context.hash(password)
 
 
 def authenticate_user(db: Session, username: str, password: str):
+    """验证用户凭据，返回用户或 None。"""
     user = get_user_by_username(db, username)
     if not user:
         return None
@@ -44,6 +49,7 @@ def authenticate_user(db: Session, username: str, password: str):
 
 # 权限装饰器：校验 current_user.roles
 def require_roles(roles):
+    """权限装饰器：校验 current_user.roles 是否包含所需角色。"""
     import json
     def decorator(func):
         @wraps(func)

@@ -1,3 +1,5 @@
+"""用户数据访问层：CRUD 与 Profile 关联创建。"""
+
 from typing import Optional
 
 from sqlalchemy.orm import Session

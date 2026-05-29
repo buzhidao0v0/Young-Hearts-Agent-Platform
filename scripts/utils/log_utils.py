@@ -1,3 +1,5 @@
+"""终端彩色输出与日志打印工具模块。"""
+
 import sys
 
 _COLORS = {
@@ -19,10 +21,12 @@ def _color(text: str, color: str) -> str:
 
 
 def print_colored(text: str, color: str = "cyan") -> None:
+    """打印彩色文本。"""
     print(_color(text, color))
 
 
 def print_stage_header(title: str) -> None:
+    """打印阶段标题分隔线。"""
     width = 60
     print()
     print(_color("=" * width, "bold"))
@@ -32,12 +36,14 @@ def print_stage_header(title: str) -> None:
 
 
 def print_check_result(name: str, passed: bool, detail: str = "") -> None:
+    """打印检查结果（✔/✘）。"""
     mark = _color("✔", "green") if passed else _color("✘", "red")
     suffix = f"  {detail}" if detail else ""
     print(f"  {mark} {name}{suffix}")
 
 
 def print_service_log(service_name: str, message: str) -> None:
+    """打印服务日志行（带前缀）。"""
     max_width = 8
     padded = service_name.upper().ljust(max_width)
     prefix = _color(f"[{padded}]", "cyan")
@@ -47,6 +53,7 @@ def print_service_log(service_name: str, message: str) -> None:
 
 
 def print_banner() -> None:
+    """打印应用启动 Banner。"""
     title = "心青年智能体平台"
     version = "v1.0.0"
     inner_width = 44
@@ -62,6 +69,7 @@ def print_banner() -> None:
 
 
 def print_shutdown_progress(name: str, pid: int, status: str) -> None:
+    """打印服务关闭进度。"""
     if status == "ok":
         mark = _color("✔", "green")
         label = "已关闭"

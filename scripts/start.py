@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""心青年智能体平台统一启动脚本。"""
+
 import argparse
 import os
 import signal
@@ -43,6 +45,7 @@ def _stream_output(name: str, proc: object) -> None:
 
 
 def signal_handler(signum: int, frame: object) -> None:
+    """SIGINT/SIGTERM 信号处理：优雅停止所有服务。"""
     global shutdown_requested
     if shutdown_requested:
         return
@@ -61,6 +64,7 @@ def signal_handler(signum: int, frame: object) -> None:
 
 
 def interactive_menu() -> list[str]:
+    """交互式菜单，返回用户选择的服务列表。"""
     print_colored("\n  心青年智能体平台 - 启动控制台", "bold")
     print_colored("  ─────────────────────────────", "cyan")
     print("  [1] API Server    (FastAPI :8000)")
@@ -74,6 +78,7 @@ def interactive_menu() -> list[str]:
 
 
 def main() -> None:
+    """主入口：解析参数、前置检查、启动服务并监控进程。"""
     parser = argparse.ArgumentParser(description="心青年智能体平台 - 统一启动脚本")
     parser.add_argument("--services", type=str, help="逗号分隔的服务组合: api,worker,web")
     parser.add_argument("--env-file", type=str, default=".env", help="环境文件路径（默认 .env）")

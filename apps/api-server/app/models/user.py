@@ -1,3 +1,5 @@
+"""用户、志愿者、专家及会话 ORM 模型定义。"""
+
 from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, JSON, ForeignKeyConstraint
 from sqlalchemy.sql import func
 from py_db.models import Base
@@ -6,6 +8,8 @@ from py_db.models import Base
 
 # 用户主表
 class User(Base):
+    """用户主表 ORM 模型，对应 users 表。"""
+
     __tablename__ = "users"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
@@ -25,6 +29,8 @@ class User(Base):
 
 # 志愿者扩展表
 class VolunteerProfile(Base):
+    """志愿者扩展表 ORM 模型，对应 volunteer_profiles 表。"""
+
     __tablename__ = "volunteer_profiles"
 
     user_id = Column(BigInteger, primary_key=True, nullable=False, comment="外键，关联 users.id")
@@ -43,6 +49,8 @@ class VolunteerProfile(Base):
 
 # 专家扩展表
 class ExpertProfile(Base):
+    """专家扩展表 ORM 模型，对应 expert_profiles 表。"""
+
     __tablename__ = "expert_profiles"
 
     user_id = Column(BigInteger, primary_key=True, nullable=False, comment="外键，关联 users.id")
@@ -60,6 +68,8 @@ class ExpertProfile(Base):
 
 # Session 会话表
 class Session(Base):
+    """会话表 ORM 模型，对应 sessions 表。"""
+
     __tablename__ = "sessions"
 
     session_id = Column(String(128), primary_key=True)

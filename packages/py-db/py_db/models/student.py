@@ -1,9 +1,13 @@
+"""学生 ORM 模型定义。"""
+
 from sqlalchemy import Column, BigInteger, String, DateTime, ForeignKeyConstraint
 from sqlalchemy.sql import func
 from py_db.session import Base
 
 
 class Student(Base):
+    """学生表 ORM 模型，对应 students 表。"""
+
     __tablename__ = "students"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
